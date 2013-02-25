@@ -371,7 +371,22 @@ window.require.register("views/app_view", function(exports, require, module) {
     };
 
     AppView.prototype.initialize = function() {
-      return this.router = CozyApp.Routers.AppRouter = new AppRouter();
+      this.router = CozyApp.Routers.AppRouter = new AppRouter();
+      this.socket = io.connect('http://127.0.0.1:9104/apps/poc-public-socket');
+      this.socket.on('connection', function() {
+        return $('#test-socket').html('Test Socket Ready');
+      });
+      return this.socket.on('message', function(data) {
+        return console.log('Server', data);
+      });
+    };
+
+    AppView.prototype.events = {
+      'click #test-socket': 'testSockets'
+    };
+
+    AppView.prototype.testSockets = function() {
+      return this.socket.emit('message', "this is a test from the client");
     };
 
     return AppView;
@@ -385,7 +400,7 @@ window.require.register("views/templates/home", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="content"><h1>Cozy template</h1><h2>Welcome private side</h2></div>');
+  buf.push('<div id="content"><h1>Cozy template</h1><h2>Welcome private side</h2><a id="test-socket">Test Sockets</a></div>');
   }
   return buf.join("");
   };
