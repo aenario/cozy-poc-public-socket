@@ -10,13 +10,14 @@ module.exports = class AppView extends View
 
     initialize: ->
         @router = CozyApp.Routers.AppRouter = new AppRouter()
-
-        @socket = io.connect('http://127.0.0.1:9104/apps/poc-public-socket');
-        @socket.on 'connection', -> $('#test-socket').html('Test Socket Ready')
-        @socket.on 'message', (data) -> console.log 'Server', data
+        url = window.location.href.replace 'http' , 'ws'
+        @socket = new WebSocket url, 'proto'
+        @socket.onopen = -> $('#test-socket').html('Test Socket Ready')
+        @socket.onerror = (err) -> console.log 'Error', err
+        @socket.onmessage = (e) -> console.log 'Server', e.data
 
     events:
         'click #test-socket': 'testSockets'
                                      
     testSockets: ->
-        @socket.emit 'message', "this is a test from the client"
+        @socket.send("this is a test from the client")
